@@ -27,7 +27,6 @@ usb_tethering=$( ip addr show | grep -c enp0s13f0u1 ) 															# SETME com
 metered_conn=$( nmcli -t -f GENERAL.DEVICE,GENERAL.METERED dev show | grep -ic METERED:yes ) 					# SETME count number of connections that are guessed or manually have their metered property set
 
 # Locations of needed commands on this system
-curl_cmd="/usr/bin/curl"
 xplanet_cmd="/usr/bin/xplanet"
 nice_cmd="/usr/bin/nice"
 python_cmd="/usr/bin/python"
@@ -45,7 +44,7 @@ kwallpaper_cmd="$earthnow_dir/ksetwallpaper.py"																	# SETME
 wallpaper_cmd="$python_cmd $kwallpaper_cmd"						                                            	# SETME
 
 # intermediate step filenames
-fileName="earthnow.jpg"
+fileNamePrefix="earthnow"
 fileNameTmp="earthnow_tmp.jpg"
 fileNameDay="earthnow_day.jpg"
 fileNameNight="earthnow_night.jpg"
@@ -62,7 +61,7 @@ while getopts ":f" opt; do
     esac
 done
 
-# Check if we are below discharing or charging thresholds. If so, do not update the image and exit.
+# Check if we are on battery. If so, use the last built image and exit.
 if [[ $forceflag -lt 1 && (( $discharging -gt 0 && $capacity -lt $discharging_floor ) || ( $discharging -lt 1 && $capacity -lt $charging_floor )) ]]; then
       echo "Due to power status, not updating the wallpaper image";
     exit 1
@@ -115,21 +114,19 @@ if [[ $updated -lt $stale_date && stop_dl -lt 1 ]]; then
   echo "Cloud file is stale, generating a new one"
   $( $python_cmd $clouds_cmd )
 else
-  echo "Cloud file is not stale or download prevented, continuing"
+  echo "Cloud file is not stale, continuing"
 fi
-
-# Actually make the wallpaper
-$( $nice_cmd -n 19 $xplanet_cmd -config $earthnow_dir/$fileNameConfig -num_times 1 -output $earthnow_dir/$fileName -geometry $geometry -body earth -projection mercator -proj_param 72 )
-# Another option for projection, which uses the radius parameter instead
-#$( $nice_cmd -n 19 $xplanet_cmd -config $earthnow_dir/$fileNameConfig -num_times 1 -output $earthnow_dir/$fileName -geometry $geometry -body earth -projection peters -radius 70 )
 
 # Get current minute number
 minutes=$( $date_cmd +%M )
 
-# Make symlink to produced wallpaper to trick desktop into thinking its a new file
-$( $ln_cmd $earthnow_dir/$fileName $earthnow_dir/earthnow_$minutes.jpg )
- 
+# Actually make the wallpaper
+$( $nice_cmd -n 19 $xplanet_cmd -config $earthnow_dir/$fileNameConfig -num_times 1 -output $earthnow_dir/$fileNamePrefix_m$minutes.jpg -geometry $geometry -body earth -projection mercator -proj_param 72 )
+# Other options for projection, which uses the radius parameter instead
+#$( $nice_cmd -n 19 $xplanet_cmd -config $earthnow_dir/$fileNameConfig -num_times 1 -output $earthnow_dir/earthnow_m$minutes.jpg -geometry $geometry -body earth -projection peters -radius 70 )
+#$( $nice_cmd -n 19 $xplanet_cmd -config $earthnow_dir/$fileNameConfig -num_times 1 -output $earthnow_dir/$fileName -geometry $geometry -body earth -projection mercator -latitude 38 -longitude -108 -proj_param 72 )
+
 # Set the wallpaper
-$( $wallpaper_cmd $earthnow_dir/earthnow_$minutes.jpg )
+$( $wallpaper_cmd $earthnow_dir/earthnow_m$minutes.jpg )
 
 exit 0;
