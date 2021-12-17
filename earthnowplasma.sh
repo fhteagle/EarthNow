@@ -16,8 +16,8 @@ forceflag=0 																									# set to 1 to skip battery and internet sta
 stop_dl=0
 
 # Battery thresholds
-discharging_floor=93 																							# SETME do not run the script if we are discharging and battery percentage is below this value
-charging_floor=70 																								# SETME do not run the script if we are charging and battery percentage is below this value
+discharging_floor=90 																							# SETME do not run the script if we are discharging and battery percentage is below this value
+charging_floor=60 																								# SETME do not run the script if we are charging and battery percentage is below this value
 
 # Commands to get key variables
 capacity=$( cat /sys/bus/acpi/drivers/battery/PNP0C0A\:00/power_supply/BAT1/capacity )  						# SETME this should retrieve a integer of current battery percentage
@@ -28,23 +28,23 @@ metered_conn=$( nmcli -t -f GENERAL.DEVICE,GENERAL.METERED dev show | grep -ic M
 
 # Locations of needed commands on this system
 xplanet_cmd="/usr/bin/xplanet"
-nice_cmd="/usr/bin/nice"
+nice_cmd="/usr/bin/nice -n 18"
 python_cmd="/usr/bin/python"
 ln_cmd="/bin/ln -sf"
 date_cmd="/bin/date"
 
-# base directory to work from
+# base directory to work in
 earthnow_dir=$( getent passwd "$USER" | cut -d: -f6 )/.xplanet/earthnow											# SETME
 
 # Command to re-generate clouds
-clouds_cmd="$earthnow_dir/generateclouds.py"																	# SETME
+clouds_cmd="$python_cmd $earthnow_dir/generateclouds.py"														# SETME
 
 # Command to update DE's wallpaper
 kwallpaper_cmd="$earthnow_dir/ksetwallpaper.py"																	# SETME
 wallpaper_cmd="$python_cmd $kwallpaper_cmd"						                                            	# SETME
 
 # intermediate step filenames
-fileNamePrefix="earthnow"
+fileNamePrefix="earthnow_m"
 fileNameTmp="earthnow_tmp.jpg"
 fileNameDay="earthnow_day.jpg"
 fileNameNight="earthnow_night.jpg"
@@ -61,7 +61,7 @@ while getopts ":f" opt; do
     esac
 done
 
-# Check if we are on battery. If so, use the last built image and exit.
+# Check if we are below battery thresholds. If so, do not update the image and exit.
 if [[ $forceflag -lt 1 && (( $discharging -gt 0 && $capacity -lt $discharging_floor ) || ( $discharging -lt 1 && $capacity -lt $charging_floor )) ]]; then
       echo "Due to power status, not updating the wallpaper image";
     exit 1
@@ -106,13 +106,13 @@ else
   printf "[earth]\nmap=$earthnow_dir/$fileNameDay\nnight_map=$earthnow_dir/$fileNameNight\ncloud_map=$earthnow_dir/$fileNameClouds" > $earthnow_dir/$fileNameConfig
 fi
 
-# Download newest cloud map, but only if it is newer than local
+# Download newest cloud map, but only if the old one is stale enough
 updated=$( $date_cmd -r $earthnow_dir/$fileNameClouds +%s )
 echo "Clouds last updated: $updated"
 stale_date=$( $date_cmd -d "$stale_mins minutes ago" +%s)
 if [[ $updated -lt $stale_date && stop_dl -lt 1 ]]; then
   echo "Cloud file is stale, generating a new one"
-  $( $python_cmd $clouds_cmd )
+  $( $clouds_cmd )
 else
   echo "Cloud file is not stale, continuing"
 fi
@@ -121,10 +121,10 @@ fi
 minutes=$( $date_cmd +%M )
 
 # Actually make the wallpaper
-$( $nice_cmd -n 19 $xplanet_cmd -config $earthnow_dir/$fileNameConfig -num_times 1 -output $earthnow_dir/$fileNamePrefix_m$minutes.jpg -geometry $geometry -body earth -projection mercator -proj_param 72 )
+$( $nice_cmd $xplanet_cmd -config $earthnow_dir/$fileNameConfig -num_times 1 -output $earthnow_dir/$fileNamePrefix$minutes.jpg -geometry $geometry -body earth -projection mercator -proj_param 72 )
 # Other options for projection, which uses the radius parameter instead
-#$( $nice_cmd -n 19 $xplanet_cmd -config $earthnow_dir/$fileNameConfig -num_times 1 -output $earthnow_dir/earthnow_m$minutes.jpg -geometry $geometry -body earth -projection peters -radius 70 )
-#$( $nice_cmd -n 19 $xplanet_cmd -config $earthnow_dir/$fileNameConfig -num_times 1 -output $earthnow_dir/$fileName -geometry $geometry -body earth -projection mercator -latitude 38 -longitude -108 -proj_param 72 )
+#$( $nice_cmd $xplanet_cmd -config $earthnow_dir/$fileNameConfig -num_times 1 -output $earthnow_dir/$fileNamePrefix$minutes.jpg -geometry $geometry -body earth -projection peters -radius 70 )
+#$( $nice_cmd $xplanet_cmd -config $earthnow_dir/$fileNameConfig -num_times 1 -output $earthnow_dir/$fileNamePrefix$minutes.jpg -geometry $geometry -body earth -projection mercator -latitude 38 -longitude -108 -proj_param 72 )
 
 # Set the wallpaper
 $( $wallpaper_cmd $earthnow_dir/earthnow_m$minutes.jpg )
