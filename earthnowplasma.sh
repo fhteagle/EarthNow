@@ -62,7 +62,7 @@ while getopts ":f" opt; do
     esac
 done
 
-# Check if we are on battery. If so, use the last built image and exit.
+# Check if we are below discharing or charging thresholds. If so, do not update the image and exit.
 if [[ $forceflag -lt 1 && (( $discharging -gt 0 && $capacity -lt $discharging_floor ) || ( $discharging -lt 1 && $capacity -lt $charging_floor )) ]]; then
       echo "Due to power status, not updating the wallpaper image";
     exit 1
@@ -115,7 +115,7 @@ if [[ $updated -lt $stale_date && stop_dl -lt 1 ]]; then
   echo "Cloud file is stale, generating a new one"
   $( $python_cmd $clouds_cmd )
 else
-  echo "Cloud file is not stale, continuing"
+  echo "Cloud file is not stale or download prevented, continuing"
 fi
 
 # Actually make the wallpaper
