@@ -1,0 +1,11 @@
+[Unit]
+Description=EarthNow Background for Plasma
+
+[Service]
+ExecStart=/SET?DIRECTORY?FOR/earthnowplasma.sh
+Type=oneshot
+Slice=earthnow.slice
+Nice=18
+
+[Install]
+WantedBy=graphical-session.target

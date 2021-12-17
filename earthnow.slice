@@ -1,0 +1,7 @@
+[Unit]
+Description=Limit resources for EarthNow Background
+DefaultDependencies=no
+Before=slices.target
+[Slice]
+CPUQuota=10%
+MemoryLimit=1G
