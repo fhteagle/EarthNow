@@ -6,11 +6,11 @@ No warranty, guarantee, support or entitlement should be assumed from the fact t
 Installation
 
 0. Get / verify dependencies:
- 0.a. Python ( not sure min or maximum version, this was last tested with Python3.9 )
+ 0.a. Python ( not sure min or maximum version, this was last tested with Python3.10 )
  0.b. nice, date, ip, and ln commands ( these come with most linux installations )
  0.c. xplanet ( available in most linux distributions freeware repos )
- 0.d. nmcli ( comes with most NetworkManager packages, but this can be modified in configuration command section )
- 0.e. systemd ( optional for running this periodically )
+ 0.d. nmcli ( comes with most NetworkManager packages, but this can be modified in configuration command section for other network manager systems )
+ 0.e. optional: systemd ( for running this script periodically, but it would work just as well via cron, chrony, etc )
 1. Download all files from this repository and place them in any directory you wish. Default location is ~HOME/.xplanet/earthnow , but this can and should be configured in the variables at the start of earthnowplasma.sh .
 2. Download generateclouds.py from https://gist.github.com/krkeegan/64e96290eb6569790d230085016501da to the same directory as earthnowplasma.sh script, and follow his instructions at the top of the file.
 3. Get the necessary python script to trigger your DE to update your wallpaper and place it in the same directory as the above files. For Plasma, I found this one to work:  https://github.com/pashazz/ksetwallpaper/blob/master/ksetwallpaper.py
