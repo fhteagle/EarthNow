@@ -1,7 +1,7 @@
 # EarthNow
 Modern fork of a classic wallpaper updater script called "EarthNow". I am not sure where I got the first version of this, but I have modified it many times over the years, adding checks for battery status, tethering, metered connections, etc. I have in the past had it set up to change the wallpaper in KDE Plasma, Gnome, enlightenment, etc. I am including instructions for a python script that works for KDE Plasma, but this could be easily adjusted for other DEs. I realize bash scripts calling python scripts is really kludgy, but I really do not care. 
 
-No warranty, guarantee, support or entitlement should be assumed from the fact that I am passing this script along to the world. Copy, distribute, and modify it as you see fit. If you are the copyright holder of any of the image files used in this method, please contact me with a DMCA request and I will be happy to take them down.
+No warranty, guarantee, support or entitlement should be assumed from the fact that I am passing this script along to the world under CC-BY-SA 4.0. The base map images I believe are from the NASA Blue Marble collection ( https://visibleearth.nasa.gov/collection/1484/blue-marble ), which should be released in the public domain. If you are the copyright holder of any of the image files used in this method, please contact me with a DMCA request and I will be happy to take them down.
 
 Installation
 
